@@ -6,6 +6,8 @@ This project provides example code for how to use `CredMarshalCredential` and `C
 a `CERT_CREDENTIAL_INFO` data blob on a `PSCredential` object. This logic is the same logic used by the 
 `Get-Credential` PowerShell cmdlet. 
 
+For a detailed walkthrough, see [this blog post](https://blogs.technet.microsoft.com/heyscriptingguy/2017/12/15/powershell-support-for-certificate-credentials/)
+
 ## Additional Resources 
 
 1. [LogonUser API](https://msdn.microsoft.com/en-us/library/windows/desktop/aa378184(v=vs.85).aspx)
