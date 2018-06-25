@@ -31,6 +31,9 @@ namespace Bongiovi.SmartcardLogon
             out IntPtr Credential
         );
 
+        [DllImport("advapi32.dll", SetLastError = true)]
+        public static extern bool CredFree([In] IntPtr buffer);
+
         public static string ReverseMarshal(string data)
         {
 
@@ -63,6 +66,41 @@ namespace Bongiovi.SmartcardLogon
             }
             return null;
         }
+
+        public static bool IsCertificateCredential(string data)
+        {
+            IntPtr credData = IntPtr.Zero;
+            IntPtr credInfo = IntPtr.Zero;
+
+            try
+            {
+                credData = Marshal.StringToHGlobalUni(data);
+                credInfo = IntPtr.Zero;
+                CRED_MARSHAL_TYPE credType = 0;
+
+                bool success = CredUnmarshalCredential(credData, out credType, out credInfo);
+
+                if (!success)
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    // Consider Logging
+                }
+
+                return (success && credType == CRED_MARSHAL_TYPE.CertCredential);
+            }
+            catch(Exception)
+            {
+                // Consider Logging
+                return false;
+            }
+            finally
+            {
+                CredFree(credInfo);
+                Marshal.FreeHGlobal(credData);
+            }
+            
+        }
+
     }
 }
 "@
@@ -74,26 +112,37 @@ add-type -AssemblyName System.Management.Automation;
 add-type -TypeDefinition $SourceCode -Language CSharp
 
 $smartcardCred = Get-Credential
-$certThumbprint = [Bongiovi.SmartcardLogon.SmartcardCredManager]::ReverseMarshal($smartcardCred.UserName);
 
-$certsReturned = Get-ChildItem cert:\currentuser\my\$certThumbprint
+$isCertCred = [Bongiovi.SmartcardLogon.SmartcardCredManager]::IsCertificateCredential($smartcardCred.UserName);
 
-if ($certsReturned.Count -eq 0)
+if ($isCertCred)
 {
-    Write-Error "Could not find the cert you want, aborting";
-    return;
-}
+    $certThumbprint = [Bongiovi.SmartcardLogon.SmartcardCredManager]::ReverseMarshal($smartcardCred.UserName);
 
-$certCredential = $certsReturned[0];
+    $certsReturned = Get-ChildItem cert:\currentuser\my\$certThumbprint
 
-Write-Output "Located certificate";
-Write-Output "Subject: " $certCredential.Subject;
-Write-Output "SubjectName: " $certCredential.SubjectName.Name;
-Write-Output "`r`n"
-Write-Output "Extension OIDs:"
+    if ($certsReturned.Count -eq 0)
+    {
+        Write-Error "Could not find the cert you want, aborting";
+        return;
+    }
 
-foreach ($extension in $certCredential.Extensions)
-{
-    Write-Output $extension.Oid.FriendlyName $extension.Oid.Value;
+    $certCredential = $certsReturned[0];
+
+    Write-Output "Located certificate";
+    Write-Output "Subject: " $certCredential.Subject;
+    Write-Output "SubjectName: " $certCredential.SubjectName.Name;
     Write-Output "`r`n"
+    Write-Output "Extension OIDs:"
+
+    foreach ($extension in $certCredential.Extensions)
+    {
+        Write-Output $extension.Oid.FriendlyName $extension.Oid.Value;
+        Write-Output "`r`n"
+    }
+}else
+{
+    Write-Output "This is a username/password credential, not a certficiate credential."
+
+    # Add logic to handle Username/Password credential
 }
