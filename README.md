@@ -6,7 +6,13 @@ This project provides example code for how to use `CredMarshalCredential` and `C
 a `CERT_CREDENTIAL_INFO` data blob on a `PSCredential` object. This logic is the same logic used by the 
 `Get-Credential` PowerShell cmdlet. 
 
-For a detailed walkthrough, see [this blog post](https://blogs.technet.microsoft.com/heyscriptingguy/2017/12/15/powershell-support-for-certificate-credentials/)
+For a detailed walkthrough, see [this blog post](https://blogs.technet.microsoft.com/heyscriptingguy/2017/12/15/powershell-support-for-certificate-credentials/).
+
+## PowerShell Examples
+
+This project also contains some example PowerShell code for how to read smartcards and generate PSCredential objects, and how to detect and process a PSCredential object that uses a smartcard. 
+
+See the [PowerShell](./PowerShell) folder for more details. 
 
 ## Additional Resources 
 
