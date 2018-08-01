@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project provides example PowerSHell code for how to read and use PSCredential objects that contain Smartcard credentials. 
+This project provides example PowerShell code for how to read and use PSCredential objects that contain Smartcard credentials. 
 
 This project contains the following PowerShell examples: 
 
